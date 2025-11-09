@@ -4,8 +4,7 @@ local player = Players.LocalPlayer
 function autoSave()
     while wait(0.1) do
         local ball = workspace:FindFirstChild("ball")
-        local goalModel = workspace:FindFirstChild("HomeGoal") -- если ты домашний ГК
-        -- если играешь за гостя: local goalModel = workspace:FindFirstChild("AwayGoal")
+        local goalModel = workspace:FindFirstChild("HomeGoal") -- или AwayGoal для гостя
         local goalPart = nil
         if goalModel then
             for _, obj in pairs(goalModel:GetChildren()) do
@@ -22,6 +21,7 @@ function autoSave()
             local delta = (ballPos - gkPos).magnitude
             if delta < 15 then
                 player.Character:MoveTo(ball.Position)
+                player.Character.Humanoid.Jump = true      -- прыгает!
             else
                 player.Character:MoveTo(gkPos)
             end
