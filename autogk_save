@@ -1,0 +1,22 @@
+-- Авто-Сейв Голкипер для Realistic Street Soccer
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local ball = workspace:FindFirstChild("SoccerBall") -- Проверь точное имя мяча!
+local goal = workspace:FindFirstChild("Goal") -- Проверь точное имя ворот!
+
+function autoSave()
+    while wait(0.1) do
+        if ball and goal and player and player.Character then
+            local gkPos = goal.Position
+            local ballPos = ball.Position
+            local delta = (ballPos - gkPos).magnitude
+            if delta < 15 then -- если мяч близко к воротам
+                player.Character:MoveTo(ball.Position) -- переместить к мячу
+            else
+                player.Character:MoveTo(gkPos) -- удерживать позицию в воротах
+            end
+        end
+    end
+end
+
+spawn(autoSave)
