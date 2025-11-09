@@ -4,9 +4,17 @@ local player = Players.LocalPlayer
 function autoSave()
     while wait(0.1) do
         local ball = workspace:FindFirstChild("ball")
-        local goalModel = workspace:FindFirstChild("HomeGoal") -- Для домашней команды
-        -- Для гостевой команды: local goalModel = workspace:FindFirstChild("AwayGoal")
-        local goalPart = goalModel and goalModel:FindFirstChildWhichIsA("BasePart") -- находишь часть ворот внутри модели
+        local goalModel = workspace:FindFirstChild("HomeGoal") -- если ты домашний ГК
+        -- если играешь за гостя, замени на "AwayGoal"
+        local goalPart = nil
+        if goalModel then
+            for _, obj in pairs(goalModel:GetChildren()) do
+                if obj:IsA("BasePart") then
+                    goalPart = obj
+                    break
+                end
+            end
+        end
 
         if ball and goalPart and player.Character then
             local gkPos = goalPart.Position
