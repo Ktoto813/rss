@@ -5,7 +5,7 @@ function autoSave()
     while wait(0.1) do
         local ball = workspace:FindFirstChild("ball")
         local goalModel = workspace:FindFirstChild("HomeGoal") -- если ты домашний ГК
-        -- если играешь за гостя, замени на "AwayGoal"
+        -- если играешь за гостя: local goalModel = workspace:FindFirstChild("AwayGoal")
         local goalPart = nil
         if goalModel then
             for _, obj in pairs(goalModel:GetChildren()) do
