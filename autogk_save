@@ -1,10 +1,13 @@
+-- Авто-Сейв голкипера для Realistic Street Soccer (без автопика!)
+-- by Ktoto813
+
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
 function autoSave()
     while wait(0.1) do
         local ball = workspace:FindFirstChild("ball")
-        local goalModel = workspace:FindFirstChild("HomeGoal") -- или AwayGoal для гостя
+        local goalModel = workspace:FindFirstChild("HomeGoal") -- Если играешь за гостя: "AwayGoal"
         local goalPart = nil
         if goalModel then
             for _, obj in pairs(goalModel:GetChildren()) do
@@ -21,7 +24,7 @@ function autoSave()
             local delta = (ballPos - gkPos).magnitude
             if delta < 15 then
                 player.Character:MoveTo(ball.Position)
-                player.Character.Humanoid.Jump = true      -- прыгает!
+                player.Character.Humanoid.Jump = true
             else
                 player.Character:MoveTo(gkPos)
             end
