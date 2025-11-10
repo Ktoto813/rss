@@ -1,133 +1,73 @@
--- Services
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local Workspace = game:GetService("Workspace")
+--== GUI ==--
+local ScreenGui = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local ToggleJumpE = Instance.new("TextButton")
+local ToggleJumpQ = Instance.new("TextButton")
+local AutoSaveBtn = Instance.new("TextButton")
 
-local player = Players.LocalPlayer
-local PlayerGui = player:WaitForChild("PlayerGui")
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+Frame.Parent = ScreenGui
+Frame.Size = UDim2.new(0, 200, 0, 150)
+Frame.Position = UDim2.new(0.5, -100, 0.5, -75)
+Frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
 
--- ScreenGui
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "AutoGK_GUI"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = PlayerGui
+ToggleJumpE.Name = "JumpE"
+ToggleJumpE.Parent = Frame
+ToggleJumpE.Size = UDim2.new(0, 180, 0, 40)
+ToggleJumpE.Position = UDim2.new(0, 10, 0, 10)
+ToggleJumpE.Text = "Jump E: OFF"
 
--- Main Frame
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 350, 0, 220)
-mainFrame.Position = UDim2.new(0.5, -175, 0.5, -110)
-mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-mainFrame.BorderSizePixel = 0
-mainFrame.Parent = screenGui
+ToggleJumpQ.Name = "JumpQ"
+ToggleJumpQ.Parent = Frame
+ToggleJumpQ.Size = UDim2.new(0, 180, 0, 40)
+ToggleJumpQ.Position = UDim2.new(0, 10, 0, 60)
+ToggleJumpQ.Text = "Jump Q: OFF"
 
--- Title
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 30)
-title.Position = UDim2.new(0, 0, 0, 0)
-title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-title.Text = "AutoGK GUI"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Font = Enum.Font.SourceSansBold
-title.TextSize = 18
-title.Parent = mainFrame
+AutoSaveBtn.Name = "AutoSave"
+AutoSaveBtn.Parent = Frame
+AutoSaveBtn.Size = UDim2.new(0, 180, 0, 40)
+AutoSaveBtn.Position = UDim2.new(0, 10, 0, 110)
+AutoSaveBtn.Text = "Auto Save: OFF"
 
--- Dragging logic
-local dragging = false
-local dragInput, mousePos, framePos
+--== Скрипт функционала ==--
+local jumpE = false
+local jumpQ = false
+local autoSave = false
 
-title.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = true
-		mousePos = input.Position
-		framePos = mainFrame.Position
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
-			end
-		end)
-	end
+ToggleJumpE.MouseButton1Click:Connect(function()
+    jumpE = not jumpE
+    ToggleJumpE.Text = "Jump E: " .. (jumpE and "ON" or "OFF")
 end)
 
-title.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement then
-		dragInput = input
-	end
+ToggleJumpQ.MouseButton1Click:Connect(function()
+    jumpQ = not jumpQ
+    ToggleJumpQ.Text = "Jump Q: " .. (jumpQ and "ON" or "OFF")
 end)
 
-UserInputService.InputChanged:Connect(function(input)
-	if input == dragInput and dragging then
-		local delta = input.Position - mousePos
-		mainFrame.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
-	end
+AutoSaveBtn.MouseButton1Click:Connect(function()
+    autoSave = not autoSave
+    AutoSaveBtn.Text = "Auto Save: " .. (autoSave and "ON" or "OFF")
 end)
 
--- Auto Save Button
-local autoSaveBtn = Instance.new("TextButton")
-autoSaveBtn.Size = UDim2.new(0, 150, 0, 40)
-autoSaveBtn.Position = UDim2.new(0, 20, 0, 50)
-autoSaveBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-autoSaveBtn.Text = "Auto Save: OFF"
-autoSaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-autoSaveBtn.Font = Enum.Font.SourceSansBold
-autoSaveBtn.TextSize = 16
-autoSaveBtn.Parent = mainFrame
+--== Автопрыжок ==--
+game:GetService("UserInputService").InputBegan:Connect(function(input, processed)
+    if processed then return end
+    local character = game.Players.LocalPlayer.Character
+    if not character then return end
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
 
-local autoSaveEnabled = false
-
-autoSaveBtn.MouseButton1Click:Connect(function()
-	autoSaveEnabled = not autoSaveEnabled
-	if autoSaveEnabled then
-		autoSaveBtn.Text = "Auto Save: ON"
-	else
-		autoSaveBtn.Text = "Auto Save: OFF"
-	end
+    if jumpE and input.KeyCode == Enum.KeyCode.E then
+        humanoid.Jump = true
+    elseif jumpQ and input.KeyCode == Enum.KeyCode.Q then
+        humanoid.Jump = true
+    end
 end)
 
--- Auto Jump
-local autoJumpEnabled = false
-local jumpKeys = {Enum.KeyCode.E, Enum.KeyCode.Q}
-
-local autoJumpBtn = Instance.new("TextButton")
-autoJumpBtn.Size = UDim2.new(0, 150, 0, 40)
-autoJumpBtn.Position = UDim2.new(0, 180, 0, 50)
-autoJumpBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-autoJumpBtn.Text = "Auto Jump: OFF"
-autoJumpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-autoJumpBtn.Font = Enum.Font.SourceSansBold
-autoJumpBtn.TextSize = 16
-autoJumpBtn.Parent = mainFrame
-
-autoJumpBtn.MouseButton1Click:Connect(function()
-	autoJumpEnabled = not autoJumpEnabled
-	if autoJumpEnabled then
-		autoJumpBtn.Text = "Auto Jump: ON"
-	else
-		autoJumpBtn.Text = "Auto Jump: OFF"
-	end
-end)
-
--- Jump logic
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if not gameProcessed and autoJumpEnabled then
-		for _, key in ipairs(jumpKeys) do
-			if input.KeyCode == key then
-				player.Character.Humanoid.Jump = true
-			end
-		end
-	end
-end)
-
--- Auto Save logic
-local ballName = "Ball"
-local goalName = "Goal"
-
-RunService.RenderStepped:Connect(function()
-	if autoSaveEnabled then
-		local ball = Workspace:FindFirstChild(ballName)
-		local goal = Workspace:FindFirstChild(goalName)
-		if ball and goal then
-			ball.Position = goal.Position + Vector3.new(0, 2, 0) -- сохраняем мяч на ГК
-		end
-	end
+--== Автосейв ГК ==--
+game:GetService("RunService").Stepped:Connect(function()
+    if autoSave then
+        -- Здесь нужно прописать твой код автосейва, например:
+        -- game:GetService("ReplicatedStorage").RemoteSave:FireServer()
+    end
 end)
