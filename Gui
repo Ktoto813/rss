@@ -168,3 +168,14 @@ end)
 -- Цвета, размеры, фамильный стиль как у популярных топовых скриптов!
 
 -- Можешь легко докинуть новые функции или добавить вкладки.
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("Auto GK Control", "Serpent")
+
+local Main = Window:NewTab("Auto GK")
+local Section = Main:NewSection("Управление")
+
+Section:NewButton("Запустить", "Включает твой автоскрипт", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/ТВОЙ_НИК/rss/main/autogk_save.lua"))()
+end)
+
+print("✅ GUI загружен!")
