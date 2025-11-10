@@ -61,3 +61,30 @@ spawn(function()
         end
     end
 end)
+-- LocalScript, должен быть в StarterPlayerScripts или в твоем GUI
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+-- Настройки автопрыжка
+local autoJump = true       -- включить/выключить автопрыжок
+local jumpInterval = 0.5    -- интервал между прыжками (в секундах)
+
+-- Функция автопрыжка
+spawn(function()
+    while true do
+        if autoJump and humanoid and humanoid.Health > 0 then
+            humanoid.Jump = true
+        end
+        wait(jumpInterval)
+    end
+end)
+
+-- Обновление персонажа при респавне
+player.CharacterAdded:Connect(function(char)
+    character = char
+    humanoid = character:WaitForChild("Humanoid")
+end)
