@@ -1,54 +1,41 @@
--- Создание ScreenGui
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "AutoGK_GUI"
-screenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+local player = game.Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
 
--- Создание главного окна
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 400, 0, 300)
-mainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
-mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-mainFrame.BorderSizePixel = 0
-mainFrame.Parent = screenGui
+-- === GUI ===
+local screenGui = Instance.new("ScreenGui", PlayerGui)
 
--- Заголовок
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 50)
-title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Font = Enum.Font.SourceSansBold
-title.TextSize = 24
-title.Text = "AutoGK GUI"
-title.Parent = mainFrame
+local buttonStart = Instance.new("TextButton")
+buttonStart.Size = UDim2.new(0,200,0,50)
+buttonStart.Position = UDim2.new(0.5,-100,0.5,-60)
+buttonStart.Text = "Start AutoGK"
+buttonStart.Parent = screenGui
 
--- Кнопка запуска скрипта
-local runButton = Instance.new("TextButton")
-runButton.Size = UDim2.new(0, 120, 0, 50)
-runButton.Position = UDim2.new(0.5, -60, 0.5, -25)
-runButton.BackgroundColor3 = Color3.fromRGB(70, 130, 180)
-runButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-runButton.Font = Enum.Font.SourceSansBold
-runButton.TextSize = 20
-runButton.Text = "Запустить"
-runButton.Parent = mainFrame
+local buttonStop = Instance.new("TextButton")
+buttonStop.Size = UDim2.new(0,200,0,50)
+buttonStop.Position = UDim2.new(0.5,-100,0.5,10)
+buttonStop.Text = "Stop AutoGK"
+buttonStop.Parent = screenGui
 
--- Функция для кнопки
-runButton.MouseButton1Click:Connect(function()
-    print("Скрипт AutoGK запущен!")
-    -- Тут можно вставить код из autogk_save.lua
-end)
+-- === AutoGK функции ===
+local AutoGK = {}
+local running = false
 
--- Кнопка закрытия
-local closeButton = Instance.new("TextButton")
-closeButton.Size = UDim2.new(0, 30, 0, 30)
-closeButton.Position = UDim2.new(1, -35, 0, 5)
-closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeButton.Font = Enum.Font.SourceSansBold
-closeButton.TextSize = 18
-closeButton.Text = "X"
-closeButton.Parent = mainFrame
+function AutoGK.Start()
+    if running then return end
+    running = true
+    print("AutoGK запущен!")
+    -- сюда твой код авто-сейва
+    while running do
+        wait(5) -- например каждые 5 секунд авто-сейв
+        print("Сохраняем прогресс...")
+    end
+end
 
-closeButton.MouseButton1Click:Connect(function()
-    screenGui:Destroy()
-end)
+function AutoGK.Stop()
+    running = false
+    print("AutoGK остановлен!")
+end
+
+-- === Связка с кнопками ===
+buttonStart.MouseButton1Click:Connect(AutoGK.Start)
+buttonStop.MouseButton1Click:Connect(AutoGK.Stop)
