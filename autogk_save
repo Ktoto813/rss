@@ -61,30 +61,39 @@ spawn(function()
         end
     end
 end)
--- LocalScript, должен быть в StarterPlayerScripts или в твоем GUI
+-- Получаем сервисы
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
 
--- Настройки автопрыжка
-local autoJump = true       -- включить/выключить автопрыжок
-local jumpInterval = 0.5    -- интервал между прыжками (в секундах)
+-- Настройки
+local saveDistance = 10 -- расстояние, на котором мяч считается "сейвнутым"
+local ballName = "Ball" -- имя мяча в Workspace
 
--- Функция автопрыжка
-spawn(function()
-    while true do
-        if autoJump and humanoid and humanoid.Health > 0 then
-            humanoid.Jump = true
+-- Функция автосейва
+local function autoSaveBall()
+    local ball = workspace:FindFirstChild(ballName)
+    if ball then
+        local distance = (ball.Position - rootPart.Position).Magnitude
+        if distance <= saveDistance then
+            -- Здесь твоя логика сохранения
+            print("Мяч сейвнут!")
+            -- Например, можно переместить мяч к игроку или вызвать событие
+            -- ball.Position = rootPart.Position + Vector3.new(0, 5, 0)
         end
-        wait(jumpInterval)
     end
+end
+
+-- Проверяем каждый кадр
+RunService.RenderStepped:Connect(function()
+    autoSaveBall()
 end)
 
--- Обновление персонажа при респавне
+-- Подстраиваемся под респавн игрока
 player.CharacterAdded:Connect(function(char)
     character = char
-    humanoid = character:WaitForChild("Humanoid")
+    rootPart = character:WaitForChild("HumanoidRootPart")
 end)
