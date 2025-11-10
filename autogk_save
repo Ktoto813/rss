@@ -1,99 +1,133 @@
--- AutoGK + GUI (рабочий вариант)
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
 
-local player = game.Players.LocalPlayer
-local gui = Instance.new("ScreenGui")
-gui.Name = "AutoGK_GUI"
-gui.Parent = player:WaitForChild("PlayerGui")
+local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
 
--- Создаём окно
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 300, 0, 200)
-frame.Position = UDim2.new(0.5, -150, 0.5, -100)
-frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-frame.BorderSizePixel = 2
-frame.Parent = gui
+-- ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "AutoGK_GUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = PlayerGui
 
--- Заголовок
+-- Main Frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 350, 0, 220)
+mainFrame.Position = UDim2.new(0.5, -175, 0.5, -110)
+mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = screenGui
+
+-- Title
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 30)
 title.Position = UDim2.new(0, 0, 0, 0)
-title.BackgroundTransparency = 1
-title.Text = "AutoGK Menu"
+title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+title.Text = "AutoGK GUI"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.SourceSansBold
-title.TextScaled = true
-title.Parent = frame
+title.TextSize = 18
+title.Parent = mainFrame
 
--- Кнопка включения авто
-local toggleButton = Instance.new("TextButton")
-toggleButton.Size = UDim2.new(0, 200, 0, 50)
-toggleButton.Position = UDim2.new(0.5, -100, 0.5, -25)
-toggleButton.Text = "Включить AutoGK"
-toggleButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleButton.Font = Enum.Font.SourceSans
-toggleButton.TextScaled = true
-toggleButton.Parent = frame
+-- Dragging logic
+local dragging = false
+local dragInput, mousePos, framePos
 
-local autoGKEnabled = false
-
-toggleButton.MouseButton1Click:Connect(function()
-    autoGKEnabled = not autoGKEnabled
-    if autoGKEnabled then
-        toggleButton.Text = "AutoGK ВКЛ"
-        toggleButton.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-        print("AutoGK включен!")
-        -- Здесь можно добавить функцию AutoGK
-        -- Например, автонажатия или действия
-    else
-        toggleButton.Text = "AutoGK ВЫКЛ"
-        toggleButton.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-        print("AutoGK выключен!")
-    end
+title.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		mousePos = input.Position
+		framePos = mainFrame.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
 end)
 
--- Пример авто-функции
-spawn(function()
-    while true do
-        wait(1)
-        if autoGKEnabled then
-            print("AutoGK работает...")  -- сюда добавляй свои действия
-        end
-    end
+title.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
 end)
--- Получаем сервисы
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local rootPart = character:WaitForChild("HumanoidRootPart")
+UserInputService.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		local delta = input.Position - mousePos
+		mainFrame.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
+	end
+end)
 
--- Настройки
-local saveDistance = 10 -- расстояние, на котором мяч считается "сейвнутым"
-local ballName = "Ball" -- имя мяча в Workspace
+-- Auto Save Button
+local autoSaveBtn = Instance.new("TextButton")
+autoSaveBtn.Size = UDim2.new(0, 150, 0, 40)
+autoSaveBtn.Position = UDim2.new(0, 20, 0, 50)
+autoSaveBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+autoSaveBtn.Text = "Auto Save: OFF"
+autoSaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoSaveBtn.Font = Enum.Font.SourceSansBold
+autoSaveBtn.TextSize = 16
+autoSaveBtn.Parent = mainFrame
 
--- Функция автосейва
-local function autoSaveBall()
-    local ball = workspace:FindFirstChild(ballName)
-    if ball then
-        local distance = (ball.Position - rootPart.Position).Magnitude
-        if distance <= saveDistance then
-            -- Здесь твоя логика сохранения
-            print("Мяч сейвнут!")
-            -- Например, можно переместить мяч к игроку или вызвать событие
-            -- ball.Position = rootPart.Position + Vector3.new(0, 5, 0)
-        end
-    end
-end
+local autoSaveEnabled = false
 
--- Проверяем каждый кадр
+autoSaveBtn.MouseButton1Click:Connect(function()
+	autoSaveEnabled = not autoSaveEnabled
+	if autoSaveEnabled then
+		autoSaveBtn.Text = "Auto Save: ON"
+	else
+		autoSaveBtn.Text = "Auto Save: OFF"
+	end
+end)
+
+-- Auto Jump
+local autoJumpEnabled = false
+local jumpKeys = {Enum.KeyCode.E, Enum.KeyCode.Q}
+
+local autoJumpBtn = Instance.new("TextButton")
+autoJumpBtn.Size = UDim2.new(0, 150, 0, 40)
+autoJumpBtn.Position = UDim2.new(0, 180, 0, 50)
+autoJumpBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+autoJumpBtn.Text = "Auto Jump: OFF"
+autoJumpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoJumpBtn.Font = Enum.Font.SourceSansBold
+autoJumpBtn.TextSize = 16
+autoJumpBtn.Parent = mainFrame
+
+autoJumpBtn.MouseButton1Click:Connect(function()
+	autoJumpEnabled = not autoJumpEnabled
+	if autoJumpEnabled then
+		autoJumpBtn.Text = "Auto Jump: ON"
+	else
+		autoJumpBtn.Text = "Auto Jump: OFF"
+	end
+end)
+
+-- Jump logic
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if not gameProcessed and autoJumpEnabled then
+		for _, key in ipairs(jumpKeys) do
+			if input.KeyCode == key then
+				player.Character.Humanoid.Jump = true
+			end
+		end
+	end
+end)
+
+-- Auto Save logic
+local ballName = "Ball"
+local goalName = "Goal"
+
 RunService.RenderStepped:Connect(function()
-    autoSaveBall()
-end)
-
--- Подстраиваемся под респавн игрока
-player.CharacterAdded:Connect(function(char)
-    character = char
-    rootPart = character:WaitForChild("HumanoidRootPart")
+	if autoSaveEnabled then
+		local ball = Workspace:FindFirstChild(ballName)
+		local goal = Workspace:FindFirstChild(goalName)
+		if ball and goal then
+			ball.Position = goal.Position + Vector3.new(0, 2, 0) -- сохраняем мяч на ГК
+		end
+	end
 end)
