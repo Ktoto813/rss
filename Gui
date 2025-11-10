@@ -1,199 +1,54 @@
--- GKPanel Fancy GUI for Realistic Street Soccer (автосейв + автопик гк)
+-- Создание ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "AutoGK_GUI"
+screenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
 
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+-- Создание главного окна
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 400, 0, 300)
+mainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = screenGui
 
--- >> GUI CREATION <<
-local gui = Instance.new("ScreenGui")
-gui.Name = "GKPanelFancy"
-gui.Parent = player.PlayerGui
-
-local frame = Instance.new("Frame")
-frame.Parent = gui
-frame.Size = UDim2.new(0, 320, 0, 170)
-frame.Position = UDim2.new(0, 140, 0, 170)
-frame.BackgroundColor3 = Color3.fromRGB(24, 28, 38)
-frame.BorderSizePixel = 0
-frame.Active = true
-frame.Draggable = true
-frame.AnchorPoint = Vector2.new(0, 0)
-frame.BackgroundTransparency = 0.07
-
+-- Заголовок
 local title = Instance.new("TextLabel")
-title.Parent = frame
-title.Text = "GK PANEL ⚽"
-title.Font = Enum.Font.GothamBold
-title.TextSize = 26
-title.TextColor3 = Color3.fromRGB(70, 211, 229)
-title.BackgroundTransparency = 1
-title.Position = UDim2.new(0, 0, 0, 10)
-title.Size = UDim2.new(1, 0, 0, 38)
+title.Size = UDim2.new(1, 0, 0, 50)
+title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 24
+title.Text = "AutoGK GUI"
+title.Parent = mainFrame
 
-local sep = Instance.new("Frame")
-sep.Parent = frame
-sep.Position = UDim2.new(0, 20, 0, 47)
-sep.Size = UDim2.new(1, -40, 0, 2)
-sep.BackgroundColor3 = Color3.fromRGB(70, 211, 229)
-sep.BorderSizePixel = 0
+-- Кнопка запуска скрипта
+local runButton = Instance.new("TextButton")
+runButton.Size = UDim2.new(0, 120, 0, 50)
+runButton.Position = UDim2.new(0.5, -60, 0.5, -25)
+runButton.BackgroundColor3 = Color3.fromRGB(70, 130, 180)
+runButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+runButton.Font = Enum.Font.SourceSansBold
+runButton.TextSize = 20
+runButton.Text = "Запустить"
+runButton.Parent = mainFrame
 
--- >> Авто-Сейв <<
-local autoSaveBtn = Instance.new("TextButton")
-autoSaveBtn.Parent = frame
-autoSaveBtn.Text = "Авто-Сейв: OFF"
-autoSaveBtn.Font = Enum.Font.GothamBold
-autoSaveBtn.TextSize = 20
-autoSaveBtn.TextColor3 = Color3.fromRGB(255,255,255)
-autoSaveBtn.BackgroundColor3 = Color3.fromRGB(60,151,44)
-autoSaveBtn.Position = UDim2.new(0, 18, 0, 65)
-autoSaveBtn.Size = UDim2.new(0, 135, 0, 38)
-autoSaveBtn.BorderSizePixel = 0
-autoSaveBtn.AutoButtonColor = true
-
-local autoSaveStatus = Instance.new("TextLabel")
-autoSaveStatus.Parent = frame
-autoSaveStatus.Text = "Неактивен"
-autoSaveStatus.Font = Enum.Font.Gotham
-autoSaveStatus.TextSize = 16
-autoSaveStatus.TextColor3 = Color3.fromRGB(180,180,180)
-autoSaveStatus.BackgroundTransparency = 1
-autoSaveStatus.Position = UDim2.new(0, 18, 0, 107)
-autoSaveStatus.Size = UDim2.new(0, 135, 0, 24)
-
--- >> Авто-Пик ГК <<
-local autoPickBtn = Instance.new("TextButton")
-autoPickBtn.Parent = frame
-autoPickBtn.Text = "Авто-Пик ГК"
-autoPickBtn.Font = Enum.Font.GothamBold
-autoPickBtn.TextSize = 20
-autoPickBtn.TextColor3 = Color3.fromRGB(255,255,255)
-autoPickBtn.BackgroundColor3 = Color3.fromRGB(198,125,33)
-autoPickBtn.Position = UDim2.new(0, 168, 0, 65)
-autoPickBtn.Size = UDim2.new(0, 135, 0, 38)
-autoPickBtn.BorderSizePixel = 0
-autoPickBtn.AutoButtonColor = true
-
-local autoPickStatus = Instance.new("TextLabel")
-autoPickStatus.Parent = frame
-autoPickStatus.Text = "Выбор голкипера"
-autoPickStatus.Font = Enum.Font.Gotham
-autoPickStatus.TextSize = 16
-autoPickStatus.TextColor3 = Color3.fromRGB(180,180,180)
-autoPickStatus.BackgroundTransparency = 1
-autoPickStatus.Position = UDim2.new(0, 168, 0, 107)
-autoPickStatus.Size = UDim2.new(0, 135, 0, 24)
-
--- >> LOGIC <<
-local running = false
-local autoGKThread
-
-local function getGKPart()
-    local goalModel = workspace:FindFirstChild("HomeGoal") -- Для гостя: заменить на "AwayGoal"
-    if goalModel then
-        for _, obj in pairs(goalModel:GetChildren()) do
-            if obj:IsA("BasePart") then return obj end
-        end
-    end
-    return nil
-end
-
-local function autoGK()
-    while running and player.Character do
-        local ball = workspace:FindFirstChild("ball")
-        local goalPart = getGKPart()
-        if ball and goalPart and player.Character then
-            local gkPos = goalPart.Position
-            local ballPos = ball.Position
-            local delta = (ballPos - gkPos).magnitude
-            if delta < 15 then
-                player.Character:MoveTo(ball.Position)
-                player.Character.Humanoid.Jump = true
-                autoSaveStatus.Text = "Мяч атакует ворота!"
-            else
-                player.Character:MoveTo(gkPos)
-                autoSaveStatus.Text = "Ожидание в воротах"
-            end
-        else
-            autoSaveStatus.Text = "Нет мяча или ворот"
-        end
-        wait(0.1)
-    end
-    autoSaveStatus.Text = "Неактивен"
-    autoSaveBtn.Text = "Авто-Сейв: OFF"
-    autoSaveBtn.BackgroundColor3 = Color3.fromRGB(60,151,44)
-end
-
-local function startAutoGK()
-    running = true
-    autoSaveBtn.Text = "Авто-Сейв: ON"
-    autoSaveBtn.BackgroundColor3 = Color3.fromRGB(65,140,215)
-    autoSaveStatus.Text = "Ожидание в воротах"
-    autoGKThread = coroutine.create(autoGK)
-    coroutine.resume(autoGKThread)
-end
-
-local function stopAutoGK()
-    running = false
-    autoSaveStatus.Text = "Неактивен"
-    autoSaveBtn.Text = "Авто-Сейв: OFF"
-    autoSaveBtn.BackgroundColor3 = Color3.fromRGB(60,151,44)
-end
-
-autoSaveBtn.MouseButton1Click:Connect(function()
-    if running then
-        stopAutoGK()
-    else
-        startAutoGK()
-    end
+-- Функция для кнопки
+runButton.MouseButton1Click:Connect(function()
+    print("Скрипт AutoGK запущен!")
+    -- Тут можно вставить код из autogk_save.lua
 end)
 
-autoPickBtn.MouseButton1Click:Connect(function()
-    local remote = game:GetService("ReplicatedStorage"):FindFirstChild("PickPositionGK") -- замени на актуальное имя RemoteEvent!
-    if remote then
-        remote:FireServer()
-        autoPickStatus.Text = "Выбран гк!"
-        autoPickBtn.BackgroundColor3 = Color3.fromRGB(67,195,114)
-        wait(2)
-        autoPickStatus.Text = "Выбор голкипера"
-        autoPickBtn.BackgroundColor3 = Color3.fromRGB(198,125,33)
-    else
-        autoPickBtn.BackgroundColor3 = Color3.fromRGB(240,52,52)
-        autoPickStatus.Text = "RemoteEvent не найден!"
-        wait(2)
-        autoPickStatus.Text = "Выбор голкипера"
-        autoPickBtn.BackgroundColor3 = Color3.fromRGB(198,125,33)
-    end
+-- Кнопка закрытия
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 30, 0, 30)
+closeButton.Position = UDim2.new(1, -35, 0, 5)
+closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.Font = Enum.Font.SourceSansBold
+closeButton.TextSize = 18
+closeButton.Text = "X"
+closeButton.Parent = mainFrame
+
+closeButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
 end)
-
--- Для гостевой стороны замени "HomeGoal" на "AwayGoal" в функции getGKPart!
--- Цвета, размеры, фамильный стиль как у популярных топовых скриптов!
-
--- Можешь легко докинуть новые функции или добавить вкладки.
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("Auto GK Control", "Serpent")
-
-local Main = Window:NewTab("Auto GK")
-local Section = Main:NewSection("Управление")
-
-Section:NewButton("Запустить", "Включает твой автоскрипт", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/ТВОЙ_НИК/rss/main/autogk_save.lua"))()
-end)
-
-print("✅ GUI загружен!")
--- gui_loader.lua (упрощённый пример)
-
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AutoGK_GUI"
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Name = "ToggleAutoGK"
-ToggleButton.Size = UDim2.new(0, 150, 0, 50)
-ToggleButton.Position = UDim2.new(0, 20, 0, 20)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-ToggleButton.TextColor3 = Color3.new(1, 1, 1)
-ToggleButton.Font = Enum.Font.SourceSansBold
-ToggleButton.TextSize = 24
-ToggleButton.Text = "Auto GK: OFF"
-ToggleButton.Parent = ScreenGui
-
-return ToggleButton
