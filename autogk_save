@@ -1,73 +1,70 @@
---== GUI ==--
+-- Авто GUI + Авто ГК Сейв + Автопрыжок на Q и E
+-- Настройка GUI
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local mouse = player:GetMouse()
+
+-- GUI
 local ScreenGui = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-local ToggleJumpE = Instance.new("TextButton")
-local ToggleJumpQ = Instance.new("TextButton")
-local AutoSaveBtn = Instance.new("TextButton")
+ScreenGui.Name = "AutoGK_GUI"
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
 
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-Frame.Parent = ScreenGui
-Frame.Size = UDim2.new(0, 200, 0, 150)
-Frame.Position = UDim2.new(0.5, -100, 0.5, -75)
-Frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 300, 0, 150)
+frame.Position = UDim2.new(0.5, -150, 0.5, -75)
+frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+frame.Parent = ScreenGui
 
-ToggleJumpE.Name = "JumpE"
-ToggleJumpE.Parent = Frame
-ToggleJumpE.Size = UDim2.new(0, 180, 0, 40)
-ToggleJumpE.Position = UDim2.new(0, 10, 0, 10)
-ToggleJumpE.Text = "Jump E: OFF"
+local title = Instance.new("TextLabel")
+title.Text = "AutoGK + Jump"
+title.Size = UDim2.new(1, 0, 0, 30)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.new(1, 1, 1)
+title.Parent = frame
 
-ToggleJumpQ.Name = "JumpQ"
-ToggleJumpQ.Parent = Frame
-ToggleJumpQ.Size = UDim2.new(0, 180, 0, 40)
-ToggleJumpQ.Position = UDim2.new(0, 10, 0, 60)
-ToggleJumpQ.Text = "Jump Q: OFF"
+-- Флаги
+local autoSaveEnabled = true
+local autoJumpEnabled = true
 
-AutoSaveBtn.Name = "AutoSave"
-AutoSaveBtn.Parent = Frame
-AutoSaveBtn.Size = UDim2.new(0, 180, 0, 40)
-AutoSaveBtn.Position = UDim2.new(0, 10, 0, 110)
-AutoSaveBtn.Text = "Auto Save: OFF"
-
---== Скрипт функционала ==--
-local jumpE = false
-local jumpQ = false
-local autoSave = false
-
-ToggleJumpE.MouseButton1Click:Connect(function()
-    jumpE = not jumpE
-    ToggleJumpE.Text = "Jump E: " .. (jumpE and "ON" or "OFF")
-end)
-
-ToggleJumpQ.MouseButton1Click:Connect(function()
-    jumpQ = not jumpQ
-    ToggleJumpQ.Text = "Jump Q: " .. (jumpQ and "ON" or "OFF")
-end)
-
-AutoSaveBtn.MouseButton1Click:Connect(function()
-    autoSave = not autoSave
-    AutoSaveBtn.Text = "Auto Save: " .. (autoSave and "ON" or "OFF")
-end)
-
---== Автопрыжок ==--
-game:GetService("UserInputService").InputBegan:Connect(function(input, processed)
-    if processed then return end
-    local character = game.Players.LocalPlayer.Character
-    if not character then return end
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if not humanoid then return end
-
-    if jumpE and input.KeyCode == Enum.KeyCode.E then
-        humanoid.Jump = true
-    elseif jumpQ and input.KeyCode == Enum.KeyCode.Q then
-        humanoid.Jump = true
+-- Функция автосейва ГК
+local function saveGK()
+    -- Здесь нужно вставить твой код сохранения ГК
+    -- Например, если у тебя есть функция saveGoalKeeper(), вызываем её:
+    if autoSaveEnabled then
+        pcall(function()
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                -- Пример логики: мяч летит к игроку — сейвим
+                -- Можешь изменить под твою игру
+                local ball = workspace:FindFirstChild("Ball")
+                if ball and (ball.Position - player.Character.HumanoidRootPart.Position).Magnitude < 20 then
+                    print("Сейвим мяч!")
+                    -- сюда вставь свою логику сейва
+                end
+            end
+        end)
     end
+end
+
+-- Автопрыжок на Q и E
+local function onInputBegan(input, gameProcessed)
+    if gameProcessed then return end
+    if autoJumpEnabled then
+        if input.KeyCode == Enum.KeyCode.Q or input.KeyCode == Enum.KeyCode.E then
+            if player.Character and player.Character:FindFirstChild("Humanoid") then
+                player.Character.Humanoid.Jump = true
+            end
+        end
+    end
+end
+
+UserInputService.InputBegan:Connect(onInputBegan)
+
+-- Цикл автосейва
+RunService.RenderStepped:Connect(function()
+    saveGK()
 end)
 
---== Автосейв ГК ==--
-game:GetService("RunService").Stepped:Connect(function()
-    if autoSave then
-        -- Здесь нужно прописать твой код автосейва, например:
-        -- game:GetService("ReplicatedStorage").RemoteSave:FireServer()
-    end
-end)
+print("AutoGK GUI запущен ✅")
